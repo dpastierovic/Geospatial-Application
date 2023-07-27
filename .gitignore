@@ -1,0 +1,12 @@
+
+GeospatialApi/GeospatialApi/bin/
+
+GeospatialApi/.vs/
+
+GeospatialApi/GeospatialApi/obj/
+
+GeospatialApp/.vscode/
+
+GeospatialApp/node_modules/
+
+GeospatialApp/.angular/
