@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 // Configure PostGis connection
-builder.Services.AddNpgsqlDataSource();
+builder.Services.AddNpgSqlDataSource();
 
 builder.Services.AddControllers();
 

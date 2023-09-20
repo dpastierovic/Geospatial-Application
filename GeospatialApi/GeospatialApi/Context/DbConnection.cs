@@ -17,8 +17,8 @@ namespace GeospatialApi.Context
       await using var connection = _dataSource.CreateConnection();
       connection.Open();
       await using var command = new NpgsqlCommand(
-        $"SELECT way as geometry FROM planet_osm_roads WHERE ST_Distance(way, " +
-        $"ST_Transform('SRID=4326;POINT({Math.Round(longitude, 4)} {Math.Round(latitude, 4)})'::geometry, 3857)) < {distance};",
+        $"SELECT ST_Transform(way, 4326) as geometry FROM planet_osm_roads WHERE ST_Distance(way, " +
+        $"ST_Transform('SRID=4326;POINT({Math.Round(longitude, 4)} {Math.Round(latitude, 4)})'::geometry, 3857)) < {distance} AND railway = 'rail';",
         connection);
 
       var reader = await command.ExecuteReaderAsync();

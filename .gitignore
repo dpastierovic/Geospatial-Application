@@ -10,3 +10,7 @@ GeospatialApp/.vscode/
 GeospatialApp/node_modules/
 
 GeospatialApp/.angular/
+
+GeospatialApi/OsmJsonToPostGis/bin/
+
+GeospatialApi/OsmJsonToPostGis/obj/
