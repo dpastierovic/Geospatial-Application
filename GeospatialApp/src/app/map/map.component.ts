@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, getModuleFactory } from '@angular/core';
 import * as mapboxgl from 'mapbox-gl';
 import { environment } from 'src/environments/environment';
 
@@ -9,6 +9,7 @@ import { environment } from 'src/environments/environment';
 })
 export class MapComponent implements OnInit {
   private map: mapboxgl.Map | undefined;
+  private pointId: number = 0;
 
   constructor() {}
 
@@ -20,6 +21,8 @@ export class MapComponent implements OnInit {
       zoom: 13,
       center: [17.107748, 48.148598],
     });
+
+    this.restoreMapCamera();
 
     this.map.addControl(new mapboxgl.NavigationControl());
     this.map.on('load', () => {
@@ -137,5 +140,87 @@ export class MapComponent implements OnInit {
         },
       });
     });
+
+    this.map.on('dragend', this.storePosition.bind(this));
+    this.map.on('zoomend', this.storeZoom.bind(this));
+    this.map.on('click', this.addPoint.bind(this));
+  }
+
+  private storeZoom(): void {
+    if (this.map == undefined) return;
+    localStorage.setItem('mapZoom', this.map.getZoom().toString());
+  }
+
+  private storePosition(): void {
+    if (this.map == undefined) return;
+    localStorage.setItem('mapLatitude', this.map.getCenter().lat.toString());
+    localStorage.setItem('mapLongitude', this.map.getCenter().lng.toString());
+  }
+
+  private restoreMapCamera(): void {
+    if (this.map == undefined) return;
+
+    let storedMapZoom = localStorage.getItem('mapZoom');
+    let storedMapLatitude = localStorage.getItem('mapLatitude');
+    let storedMapLongitude = localStorage.getItem('mapLongitude');
+
+    if (storedMapZoom != null) {
+      this.map.setZoom(Number.parseFloat(storedMapZoom));
+    }
+
+    if (storedMapLatitude != null && storedMapLongitude != null) {
+      this.map.setCenter([
+        Number.parseFloat(storedMapLongitude),
+        Number.parseFloat(storedMapLatitude),
+      ]);
+    }
+  }
+
+  private addPoint(e: mapboxgl.MapMouseEvent): void {
+    if (this.map == undefined) return;
+
+    let clickedGeometries = this.map.queryRenderedFeatures(e.point);
+    let clickedPoints = clickedGeometries.filter((geometry) =>
+      geometry.source.toString().startsWith('point')
+    );
+
+    if (clickedPoints.length > 0) {
+      clickedPoints.forEach((geometry) => {
+        this.map?.removeLayer(geometry.source.toString());
+        this.map?.removeSource(geometry.source.toString());
+      });
+      return;
+    }
+
+    this.map.addSource(`point${this.pointId}`, {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [e.lngLat.lng, e.lngLat.lat],
+        },
+        properties: {
+          name: 'point',
+        },
+      },
+    });
+
+    this.map.addLayer({
+      id: `point${this.pointId}`,
+      type: 'circle',
+      source: `point${this.pointId}`,
+      paint: {
+        'circle-radius': {
+          stops: [
+            [1, 3],
+            [15, 10],
+          ],
+        },
+        'circle-color': '#e55e5e',
+      },
+    });
+
+    this.pointId++;
   }
 }
