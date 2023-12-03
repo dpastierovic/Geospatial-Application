@@ -2,4 +2,12 @@
   <div class="col-lg-11">
     <div id="mapContainer" class="match-parent"></div>
   </div>
+  <div class="col">
+    <div class="row mt-1">
+      <button (click)="GetShopsHeatMap()">Shops heatmap</button>
+    </div>
+    <div class="row mt-1">
+      <input type="number" id="widthInDeg" name="widthInDeg" [(ngModel)]="widthInDeg" />
+    </div>
+  </div>
 </div>

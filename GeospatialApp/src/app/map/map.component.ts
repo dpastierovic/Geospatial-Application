@@ -1,3 +1,4 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Component, OnInit, getModuleFactory } from '@angular/core';
 import * as mapboxgl from 'mapbox-gl';
 import { environment } from 'src/environments/environment';
@@ -10,8 +11,9 @@ import { environment } from 'src/environments/environment';
 export class MapComponent implements OnInit {
   private map: mapboxgl.Map | undefined;
   private pointId: number = 0;
+  protected widthInDeg: number = 0.05;
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
     this.map = new mapboxgl.Map({
@@ -222,5 +224,76 @@ export class MapComponent implements OnInit {
     });
 
     this.pointId++;
+  }
+
+  protected GetShopsHeatMap(): void {
+    if (this.map == undefined) return;
+    if (this.map.getSource('shops')) {
+      this.map.removeLayer('shops');
+      this.map.removeSource('shops');
+    }
+
+    var bounds = this.map.getBounds();
+    var p1 = bounds.getSouthWest();
+    var p2 = bounds.getNorthEast();
+    var options = { params: new HttpParams()
+      .append('latPoint1', p1.lat.toString())
+      .append('lonPoint1', p1.lng.toString())
+      .append('latPoint2', p2.lat.toString())
+      .append('lonPoint2', p2.lng.toString())
+      .append('gridSquareInDeg', this.widthInDeg)
+    }
+    this.http.get<string>('api/osm/GetShopsHeatMap', options).subscribe(shops => {
+      if (this.map == undefined) {
+        return;
+      }
+console.log(shops);
+      this.map.addSource('shops', {
+        'type': 'geojson',
+        'data': shops
+        });
+
+      this.map.addLayer({
+        'id': 'shops',
+        'type': 'fill',
+        'source': 'shops',
+        'layout': {},
+        'paint': {
+          'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'count'],
+          0,
+          '#F2F12D',
+          5,
+          '#EED322',
+          7,
+          '#E6B71E',
+          10,
+          '#DA9C20',
+          25,
+          '#CA8323',
+          50,
+          '#B86B25',
+          75,
+          '#A25626',
+          100,
+          '#8B4225',
+          250,
+          '#723122'
+          ],
+          'fill-opacity': [
+            'interpolate',
+            ['linear'],
+            ['get', 'count'],
+            0, 0, 5, 0.5
+          ]
+          }
+        });
+
+        console.log(this.map.getLayer('shops'))
+        console.log(this.map.getSource('shops'))
+    });
+;
   }
 }
