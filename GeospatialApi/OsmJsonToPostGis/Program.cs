@@ -1,12 +1,13 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.Runtime.CompilerServices;
 using System.Text;
-using GeospatialApi.Config;
 using Newtonsoft.Json;
+using Npgsql;
 using OsmJsonToPostGis.DataModel;
 
-using var connection = DbConnectionConfig.CreateNpgSqlDataSource();
+var dataSourceBuilder = new NpgsqlDataSourceBuilder("Server=127.0.0.1;Port=5432;Database=GeoDatabase;User Id=postgres;Password=password;");
+dataSourceBuilder.UseNetTopologySuite();
+using var connection = dataSourceBuilder.Build();
 
 var json = File.ReadAllText(@"Data/slovakia-railway.json");
 

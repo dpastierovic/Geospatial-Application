@@ -7,9 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NetTopologySuite.IO.GeoJSON4STJ" Version="3.0.0" />
-    <PackageReference Include="Npgsql" Version="7.0.4" />
-    <PackageReference Include="Npgsql.NetTopologySuite" Version="7.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
